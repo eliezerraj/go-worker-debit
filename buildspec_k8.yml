@@ -41,4 +41,3 @@ phases:
       - kubectl apply -f .kubernetes/aws/secret_store_service_account.yaml 
       - kubectl apply -f .kubernetes/aws/external-secret.yaml 
       - kubectl apply -f .kubernetes/aws/deployment.yaml
-      - kubectl apply -f .kubernetes/aws/svc.yaml

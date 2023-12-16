@@ -17,7 +17,7 @@ data:
   KAFKA_PASSWORD: "admin"
   KAFKA_PROTOCOL: "PLAINTEXT"
   KAFKA_MECHANISM: "PLAINTEXT"
-  KAFKA_CLIENT_ID: "GO-WORKER-BALANCE"
+  KAFKA_CLIENT_ID: "GO-WORKER-DEBIT"
   KAFKA_GROUP_ID: "GROUP-03"
   KAFKA_BROKER_1: "b-1.mskarchtest02.9vkh4b.c3.kafka.us-east-2.amazonaws.com:9092"
   KAFKA_BROKER_2: "b-2.mskarchtest02.9vkh4b.c3.kafka.us-east-2.amazonaws.com:9092"

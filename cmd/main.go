@@ -157,6 +157,10 @@ func getEnv() {
 		envDB.Schema = os.Getenv("DB_SCHEMA")
 	}
 
+	if os.Getenv("SERVER_URL_DOMAIN") !=  "" {	
+		serverUrlDomain = os.Getenv("SERVER_URL_DOMAIN")
+	}
+	
 	if os.Getenv("KAFKA_USER") !=  "" {
 		envKafka.KafkaConfigurations.Username = os.Getenv("KAFKA_USER")
 	}

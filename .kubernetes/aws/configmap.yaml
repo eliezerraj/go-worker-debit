@@ -27,4 +27,4 @@ data:
   TOPICS: "topic.debit"
   #SERVER_URL_DOMAIN: "http://svc-go-debit.test-a.svc.cluster.local:5002"
   SERVER_URL_DOMAIN: "https://vpce.global.dev.caradhras.io/pv"
-  X_APIGW_API_ID: "7egms7zn67
+  X_APIGW_API_ID: "7egms7zn67"

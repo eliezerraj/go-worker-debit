@@ -7,6 +7,7 @@ import (
 	"sync"
 	"context"
 	"encoding/json"
+	"strconv"
 
 	"github.com/rs/zerolog/log"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -28,9 +29,6 @@ func NewConsumerWorker(	ctx context.Context,
 						configurations *core.KafkaConfig,
 						workerService	*service.WorkerService ) (*ConsumerWorker, error) {
 	childLogger.Debug().Msg("NewConsumerWorker")
-
-	_, root := xray.BeginSubsegment(ctx, "Event.NewConsumerWorker")
-	defer root.Close(nil)
 
 	kafkaBrokerUrls := 	configurations.KafkaConfigurations.Brokers1 + "," + configurations.KafkaConfigurations.Brokers2 + "," + configurations.KafkaConfigurations.Brokers3
 	config := &kafka.ConfigMap{	"bootstrap.servers":            kafkaBrokerUrls,
@@ -91,12 +89,6 @@ func (c *ConsumerWorker) Consumer(ctx context.Context, wg *sync.WaitGroup, topic
 					childLogger.Error().Interface("kafka.PartitionEOF: ",e).Msg("")
 				case *kafka.Message:
 					
-					_, root := xray.BeginSubsegment(ctx, "Event.Message")
-					defer root.Close(nil)
-
-					//ctxRay, seg := xray.BeginSegment(ctx, "balance-worker:10")
-					//defer seg.Close(nil)
-
 					log.Print("----------------------------------")
 					if e.Headers != nil {
 						log.Printf("Headers: %v\n", e.Headers)
@@ -107,12 +99,17 @@ func (c *ConsumerWorker) Consumer(ctx context.Context, wg *sync.WaitGroup, topic
 					event := core.Event{}
 					json.Unmarshal(e.Value, &event)
 
-					err = c.workerService.DebitFundSchedule(ctx, *event.EventData.Transfer)
-					if err != nil {
-						childLogger.Error().Err(err).Msg("Erro no service.DebitFundSchedule")
-					}
+					newSegment := "go-worker-debit:"+ event.EventData.Transfer.AccountIDTo + ":" + strconv.Itoa(event.EventData.Transfer.ID)
+					ctxray, seg := xray.BeginSegment(ctx, newSegment)
+					defer seg.Close(nil)
 
-					c.consumer.Commit()
+					err = c.workerService.DebitFundSchedule(ctxray, *event.EventData.Transfer)
+					if err != nil {
+						childLogger.Error().Err(err).Msg("Erro no service.DebitFundSchedule ROLLBACK !!!!")
+					} else {
+						childLogger.Debug().Msg("COMMIT!!!!")
+						c.consumer.Commit()
+					}
 
 				case kafka.Error:
 					childLogger.Error().Err(e).Msg("kafka.Error")

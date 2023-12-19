@@ -21,7 +21,6 @@ import(
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
-	"github.com/aws/aws-xray-sdk-go/xray"
 
 )
 
@@ -183,8 +182,7 @@ func main()  {
 	log.Debug().Msg("main")
 	log.Info().Interface("infoPod: ",infoPod).Msg("")
 
-	ctx, seg := xray.BeginSegment(context.Background(), "go-worker-debit:")
-	defer seg.Close(nil)
+	ctx := context.Background()
 
 	// Open Database
 	count := 1

@@ -33,7 +33,7 @@ func (s WorkerService) DebitFundSchedule(ctx context.Context, transfer core.Tran
 	debit.AccountID = transfer.AccountIDTo
 	debit.Currency = transfer.Currency
 	debit.Amount = transfer.Amount
-	credit.Type = "DEBIT"
+	debit.Type = "DEBIT"
 
 	_, err = s.restapi.PostData(ctx, s.restapi.ServerUrlDomain ,s.restapi.XApigwId ,"/add", debit)
 	if err != nil {

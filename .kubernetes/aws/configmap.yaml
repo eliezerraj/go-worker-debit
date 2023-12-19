@@ -12,6 +12,7 @@ data:
   DB_PORT: "5432"
   DB_NAME: "postgres"
   DB_SCHEMA: "public"
+  DB_DRIVER: "postgres"
   NO_AZ: "true"
   KAFKA_USER: "admin"
   KAFKA_PASSWORD: "admin"

@@ -41,6 +41,9 @@ phases:
       - kubectl apply -f .kubernetes/aws/secret_store_service_account.yaml 
       - kubectl apply -f .kubernetes/aws/external-secret.yaml 
       - kubectl apply -f .kubernetes/aws/deployment.yaml
-
+      - kubectl apply -f .kubernetes/aws/secret-msk.yaml
+      - kubectl apply -f .kubernetes/aws/keda_auth.yaml
+      - kubectl apply -f .kubernetes/aws/keda.yaml
+      
       - echo Start rollout...   
       - kubectl rollout restart deployment/go-worker-debit -n test-a

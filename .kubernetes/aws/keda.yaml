@@ -1,0 +1,26 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: &component-name keda-scale-go-worker-debit
+  namespace: test-a
+  labels:
+    app: *component-name
+spec:
+  scaleTargetRef:
+    name: go-worker-debit
+  pollingInterval: 30
+  cooldownPeriod:  60
+  idleReplicaCount: 0 # Optional. Default: 0
+  minReplicaCount: 0 # Optional. Default: 0
+  maxReplicaCount: 6 # Optional. Default: 6
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: "b-1.mskarchtest02.9vkh4b.c3.kafka.us-east-2.amazonaws.com:9092,b-2.mskarchtest02.9vkh4b.c3.kafka.us-east-2.amazonaws.com:9092"
+      consumerGroup: "GROUP-GO-WORKER-DEBIT-01"   # Make sure that this consumer group name is the same one as the one that is consuming topics
+      topic: topic.debit
+      # Optional
+      lagThreshold: "5"
+      offsetResetPolicy: latest
+    authenticationRef:
+      name: keda-auth-go-worker-debit

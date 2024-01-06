@@ -1,0 +1,15 @@
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: &component-name keda-auth-go-worker-debit
+  namespace: test-a
+  labels:
+    app: *component-name
+spec:
+  secretTargetRef:
+  - parameter: username
+    name: es-msk-go-worker-debit
+    key: username
+  - parameter: password
+    name: es-msk-go-worker-debit
+    key: password

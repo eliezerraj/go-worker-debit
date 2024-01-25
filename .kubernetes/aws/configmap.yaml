@@ -8,7 +8,8 @@ metadata:
 data:
   POD_NAME: "go-worker-debit"
   API_VERSION: "1.1"
-  DB_HOST: "db-arch.couoacqalfwt.us-east-2.rds.amazonaws.com"
+  #DB_HOST: "db-arch.couoacqalfwt.us-east-2.rds.amazonaws.com"
+  DB_HOST: "rds-proxy-db-arch.proxy-couoacqalfwt.us-east-2.rds.amazonaws.com"
   DB_PORT: "5432"
   DB_NAME: "postgres"
   DB_SCHEMA: "public"

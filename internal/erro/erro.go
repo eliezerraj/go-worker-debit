@@ -11,4 +11,5 @@ var (
 	ErrNotFound 		= errors.New("Item não encontrado")
 	ErrUnauthorized 	= errors.New("Erro de autorização")
 	ErrDecode			= errors.New("Erro na decodificação do Base64")
+	ErrUpdate			= errors.New("Erro no update do dado")
 )

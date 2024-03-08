@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/go-worker-debit/internal/core"
+	"github.com/go-worker-debit/internal/erro"
 	"github.com/aws/aws-xray-sdk-go/xray"
 
 )
@@ -41,8 +42,12 @@ func (s WorkerService) DebitFundSchedule(ctx context.Context, transfer core.Tran
 	}
 
 	transfer.Status = "DEBIT_DONE"
-	_, err = s.workerRepository.Update(ctx,tx ,transfer)
+	res_update, err := s.workerRepository.Update(ctx,tx ,transfer)
 	if err != nil {
+		return err
+	}
+	if res_update == 0 {
+		err = erro.ErrUpdate
 		return err
 	}
 

@@ -16,9 +16,9 @@ spec:
   triggers:
   - type: kafka
     metadata:
-      bootstrapServers: "b-1.mskarchtest02.9vkh4b.c3.kafka.us-east-2.amazonaws.com:9092,b-2.mskarchtest02.9vkh4b.c3.kafka.us-east-2.amazonaws.com:9092"
+      bootstrapServers: "b-1.mskarchtest03.p70t1p.c6.kafka.us-east-2.amazonaws.com:9092,b-2.mskarchtest03.p70t1p.c6.kafka.us-east-2.amazonaws.com:9092,b-3.mskarchtest03.p70t1p.c6.kafka.us-east-2.amazonaws.com:9092"
       consumerGroup: "GROUP-GO-WORKER-DEBIT-01"   # Make sure that this consumer group name is the same one as the one that is consuming topics
-      topic: topic.debit
+      topic: topic.debit.01
       # Optional
       lagThreshold: "5"
       offsetResetPolicy: latest

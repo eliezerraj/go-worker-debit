@@ -12,4 +12,6 @@ var (
 	ErrUnauthorized 	= errors.New("Erro de autorização")
 	ErrDecode			= errors.New("Erro na decodificação do Base64")
 	ErrUpdate			= errors.New("Erro no update do dado")
+	ErrTransInvalid		= errors.New("Erro de transação invalida")
+	ErrEvent			= errors.New("Erro no tratamento de evento")
 )

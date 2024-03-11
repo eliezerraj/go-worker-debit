@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"github.com/rs/zerolog/log"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/go-worker-debit/internal/core"
 	"github.com/go-worker-debit/internal/service"
 	"github.com/aws/aws-xray-sdk-go/xray"
@@ -42,7 +42,7 @@ func NewConsumerWorker(	ctx context.Context,
 								"client.id": 					configurations.KafkaConfigurations.Clientid,
 								"session.timeout.ms":    		6000,
 								"enable.idempotence":			true,
-								"auto.offset.reset":     		"latest",  
+								"auto.offset.reset":     		"earliest", //"latest",  
 								}
 
 	consumer, err := kafka.NewConsumer(config)
@@ -106,6 +106,7 @@ func (c *ConsumerWorker) Consumer(ctx context.Context, wg *sync.WaitGroup, topic
 					err = c.workerService.DebitFundSchedule(ctxray, *event.EventData.Transfer)
 					if err != nil {
 						childLogger.Error().Err(err).Msg("Erro no service.DebitFundSchedule ROLLBACK !!!!")
+						childLogger.Debug().Msg("ROLLBACK!!!!")	
 					} else {
 						childLogger.Debug().Msg("COMMIT!!!!")
 						c.consumer.Commit()

@@ -2,11 +2,34 @@ package service
 
 import (
 	"context"
+	"github.com/rs/zerolog/log"
+	"github.com/go-worker-debit/internal/repository/postgre"
+	"github.com/go-worker-debit/internal/adapter/restapi"
 	"github.com/go-worker-debit/internal/core"
 	"github.com/go-worker-debit/internal/erro"
 	"github.com/aws/aws-xray-sdk-go/xray"
 
 )
+
+var childLogger = log.With().Str("service", "service").Logger()
+
+type WorkerService struct {
+	workerRepository 		*postgre.WorkerRepository
+	restEndpoint			*core.RestEndpoint
+	restApiService			*restapi.RestApiService
+}
+
+func NewWorkerService(	workerRepository *postgre.WorkerRepository,
+						restEndpoint		*core.RestEndpoint,
+						restApiService		*restapi.RestApiService) *WorkerService{
+	childLogger.Debug().Msg("NewWorkerService")
+
+	return &WorkerService{
+		workerRepository:	workerRepository,
+		restEndpoint:		restEndpoint,
+		restApiService:		restApiService,
+	}
+}
 
 func (s WorkerService) DebitFundSchedule(ctx context.Context, transfer core.Transfer) (error){
 	childLogger.Debug().Msg("DebitFundSchedule")
@@ -37,7 +60,11 @@ func (s WorkerService) DebitFundSchedule(ctx context.Context, transfer core.Tran
 	debit.Type = transfer.Type
 	transfer.Status = "DEBIT_DONE"
 
-	_, err = s.restapi.PostData(ctx, s.restapi.ServerUrlDomain ,s.restapi.XApigwId ,"/add", debit)
+	_, err = s.restApiService.PostData(ctx, 
+										s.restEndpoint.ServiceUrlDomain,
+										s.restEndpoint.XApigwId,
+										"/add", 
+										debit)
 	if err != nil {
 		switch err{
 			case erro.ErrTransInvalid:

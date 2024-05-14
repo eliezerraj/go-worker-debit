@@ -1,4 +1,4 @@
-package db_postgre
+package postgre
 
 import (
 	"context"
@@ -19,7 +19,8 @@ type DatabaseHelperImplementacion struct {
 	client   	*sql.DB
 }
 
-func NewDatabaseHelper(ctx context.Context, databaseRDS core.DatabaseRDS) (DatabaseHelper, error) {
+func NewDatabaseHelper(ctx context.Context, 
+						databaseRDS *core.DatabaseRDS) (DatabaseHelper, error) {
 	childLogger.Debug().Msg("NewDatabaseHelper")
 	
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", 

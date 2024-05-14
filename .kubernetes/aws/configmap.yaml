@@ -25,7 +25,7 @@ data:
   KAFKA_BROKER_3: "b-3.mskarchtest03.p70t1p.c6.kafka.us-east-2.amazonaws.com:9092"
   KAFKA_PARTITION: "3"
   KAFKA_REPLICATION: "2"
-  TOPICS: "topic.debit.01"
+  TOPIC_DEBIT: "topic.debit.01"
   SERVICE_URL_DOMAIN: "https://vpce.global.dev.caradhras.io/pv"
   X_APIGW_API_ID: "7egms7zn67"
 

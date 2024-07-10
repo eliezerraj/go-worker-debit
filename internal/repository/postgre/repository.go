@@ -9,8 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/go-worker-debit/internal/core"
-	"github.com/aws/aws-xray-sdk-go/xray"
-
+	"github.com/go-worker-debit/internal/lib"
 )
 
 var childLogger = log.With().Str("repository", "WorkerRepository").Logger()
@@ -57,11 +56,9 @@ func (w WorkerRepository) Ping(ctx context.Context) (bool, error) {
 func (w WorkerRepository) Update(ctx context.Context, tx *sql.Tx, transfer core.Transfer) (int64, error){
 	childLogger.Debug().Msg("Update")
 	childLogger.Debug().Interface("transfer : ", transfer).Msg("")
-
-	_, root := xray.BeginSubsegment(ctx, "SQL.Update")
-	defer func() {
-		root.Close(nil)
-	}()
+	
+	span := lib.Span(ctx, "repo.Update")	
+    defer span.End()
 
 	stmt, err := tx.Prepare(`Update transfer_moviment
 									set status = $2

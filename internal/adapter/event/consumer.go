@@ -13,8 +13,11 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/go-worker-debit/internal/core"
 	"github.com/go-worker-debit/internal/service"
-	"github.com/aws/aws-xray-sdk-go/xray"
+	"github.com/go-worker-debit/internal/lib"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/contrib/propagators/aws/xray"
 )
 
 var childLogger = log.With().Str("adpater", "kafka").Logger()
@@ -23,6 +26,7 @@ type ConsumerWorker struct{
 	configurations  *core.KafkaConfig
 	consumer        *kafka.Consumer
 	workerService	*service.WorkerService
+	tracer 			trace.Tracer
 }
 
 func NewConsumerWorker(	ctx context.Context, 
@@ -57,10 +61,23 @@ func NewConsumerWorker(	ctx context.Context,
 	}, nil
 }
 
-func (c *ConsumerWorker) Consumer(ctx context.Context, wg *sync.WaitGroup, topic string) {
+func (c *ConsumerWorker) Consumer(ctx context.Context, wg *sync.WaitGroup, appServer core.WorkerAppServer) {
 	childLogger.Debug().Msg("Consumer")
 
-	topics := []string{topic}
+	// ---------------------- OTEL ---------------
+	childLogger.Info().Str("OTEL_EXPORTER_OTLP_ENDPOINT :", appServer.ConfigOTEL.OtelExportEndpoint).Msg("")
+	
+	tp := lib.NewTracerProvider(ctx, appServer.ConfigOTEL, appServer.InfoPod)
+	defer func() { 
+		err := tp.Shutdown(ctx)
+		if err != nil{
+			childLogger.Error().Err(err).Msg("Erro closing OTEL tracer !!!")
+		}
+	}()
+	otel.SetTextMapPropagator(xray.Propagator{})
+	otel.SetTracerProvider(tp)
+
+	topics := []string{appServer.KafkaConfig.Topic.Debit}
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 
@@ -99,11 +116,11 @@ func (c *ConsumerWorker) Consumer(ctx context.Context, wg *sync.WaitGroup, topic
 					event := core.Event{}
 					json.Unmarshal(e.Value, &event)
 
-					newSegment := "go-worker-debit:"+ event.EventData.Transfer.AccountIDTo + ":" + strconv.Itoa(event.EventData.Transfer.ID)
-					ctxray, seg := xray.BeginSegment(ctx, newSegment)
-					defer seg.Close(nil)
+					tracer := tp.Tracer("go-worker-debit:" + event.EventData.Transfer.AccountIDTo + ":" + strconv.Itoa(event.EventData.Transfer.ID))
+					ctx, span := tracer.Start(ctx, "go-worker-debit")
+					defer span.End()
 
-					err = c.workerService.DebitFundSchedule(ctxray, *event.EventData.Transfer)
+					err = c.workerService.DebitFundSchedule(ctx, *event.EventData.Transfer)
 					if err != nil {
 						childLogger.Error().Err(err).Msg("Erro no service.DebitFundSchedule ROLLBACK !!!!")
 						childLogger.Debug().Msg("ROLLBACK!!!!")	

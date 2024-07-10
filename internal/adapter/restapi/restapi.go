@@ -10,7 +10,7 @@ import(
 
 	"github.com/rs/zerolog/log"
 	"github.com/go-worker-debit/internal/erro"
-	"github.com/aws/aws-xray-sdk-go/xray"
+	"github.com/go-worker-debit/internal/lib"
 )
 
 var childLogger = log.With().Str("adapter/restapi", "restapi").Logger()
@@ -26,12 +26,10 @@ func NewRestApiService() (*RestApiService){
 	}
 }
 //--------------------------------------------------
-func (r *RestApiService) GetData(ctx context.Context, serverUrlDomain string, xApigwId string, path string, id string) (interface{}, error) {
+func (r *RestApiService) GetData(ctx context.Context, urlDomain string, xApigwId string, data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("GetData")
 
-	domain := serverUrlDomain + path +"/" + id
-
-	data_interface, err := makeGet(ctx, domain, xApigwId ,id)
+	data_interface, err := makeGet(ctx, urlDomain, xApigwId ,data)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return nil, err
@@ -40,12 +38,10 @@ func (r *RestApiService) GetData(ctx context.Context, serverUrlDomain string, xA
 	return data_interface, nil
 }
 
-func (r *RestApiService) PostData(ctx context.Context, serverUrlDomain string, xApigwId string, path string ,data interface{}) (interface{}, error) {
+func (r *RestApiService) PostData(ctx context.Context, urlDomain string, xApigwId string, data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("PostData")
 
-	domain := serverUrlDomain + path 
-
-	data_interface, err := makePost(ctx, domain, xApigwId ,data)
+	data_interface, err := makePost(ctx, urlDomain, xApigwId ,data)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return nil, err
@@ -54,19 +50,21 @@ func (r *RestApiService) PostData(ctx context.Context, serverUrlDomain string, x
 	return data_interface, nil
 }
 
-func makeGet(ctx context.Context, url string, xApigwId string, id interface{}) (interface{}, error) {
+func makeGet(ctx context.Context, url string, xApigwId string, data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("makeGet")
-	client := xray.Client(&http.Client{Timeout: time.Second * 29})
-	
 	childLogger.Debug().Str("url : ", url).Msg("")
 	childLogger.Debug().Str("xApigwId : ", xApigwId).Msg("")
+
+	span := lib.Span(ctx, url)	
+    defer span.End()
+
+	client := &http.Client{Timeout: time.Second * 29}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return false, errors.New(err.Error())
 	}
-
 	req.Header.Add("Content-Type", "application/json;charset=UTF-8");
 	req.Header.Add("x-apigw-api-id", xApigwId);
 
@@ -75,6 +73,7 @@ func makeGet(ctx context.Context, url string, xApigwId string, id interface{}) (
 		childLogger.Error().Err(err).Msg("error Do Request")
 		return false, errors.New(err.Error())
 	}
+	defer resp.Body.Close()
 
 	childLogger.Debug().Int("StatusCode :", resp.StatusCode).Msg("")
 	switch (resp.StatusCode) {
@@ -93,7 +92,7 @@ func makeGet(ctx context.Context, url string, xApigwId string, id interface{}) (
 			return false, erro.ErrServer
 	}
 
-	result := id
+	result := data
 	err = json.NewDecoder(resp.Body).Decode(&result)
     if err != nil {
 		childLogger.Error().Err(err).Msg("error no ErrUnmarshal")
@@ -105,10 +104,13 @@ func makeGet(ctx context.Context, url string, xApigwId string, id interface{}) (
 
 func makePost(ctx context.Context, url string, xApigwId string, data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("makePost")
-	client := xray.Client(&http.Client{Timeout: time.Second * 29})
-	
 	childLogger.Debug().Str("url : ", url).Msg("")
 	childLogger.Debug().Str("xApigwId : ", xApigwId).Msg("")
+
+	span := lib.Span(ctx, url)	
+    defer span.End()
+
+	client := &http.Client{Timeout: time.Second * 29}
 
 	payload := new(bytes.Buffer)
 	json.NewEncoder(payload).Encode(data)
@@ -118,7 +120,6 @@ func makePost(ctx context.Context, url string, xApigwId string, data interface{}
 		childLogger.Error().Err(err).Msg("error Request")
 		return false, errors.New(err.Error())
 	}
-
 	req.Header.Add("Content-Type", "application/json;charset=UTF-8");
 	req.Header.Add("x-apigw-api-id", xApigwId);
 
@@ -127,6 +128,7 @@ func makePost(ctx context.Context, url string, xApigwId string, data interface{}
 		childLogger.Error().Err(err).Msg("error Do Request")
 		return false, errors.New(err.Error())
 	}
+	defer resp.Body.Close()
 
 	childLogger.Debug().Int("StatusCode :", resp.StatusCode).Msg("")
 	switch (resp.StatusCode) {

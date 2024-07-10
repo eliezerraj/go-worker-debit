@@ -30,13 +30,14 @@ type InfoPod struct {
 	IPAddress			string `json:"ip_address"`
 	AvailabilityZone 	string `json:"availabilityZone"`
 	IsAZ				bool   	`json:"is_az"`
+	Env					string `json:"enviroment,omitempty"`
+	AccountID			string `json:"account_id,omitempty"`
 }
 
 type RestEndpoint struct {
 	ServiceUrlDomain 		string `json:"service_url_domain"`
 	XApigwId				string `json:"xApigwId"`
 }
-
 
 type KafkaConfig struct {
 	KafkaConfigurations    	*KafkaConfigurations

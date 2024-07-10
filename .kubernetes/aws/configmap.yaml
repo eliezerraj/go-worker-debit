@@ -28,5 +28,6 @@ data:
   TOPIC_DEBIT: "topic.debit.01"
   SERVICE_URL_DOMAIN: "https://vpce.global.dev.caradhras.io/pv"
   X_APIGW_API_ID: "7egms7zn67"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "arch-eks-01-xray-collector.default.svc.cluster.local:4317"
 
   #SERVICE_URL_DOMAIN: "http://svc-go-debit.test-a.svc.cluster.local:5002"

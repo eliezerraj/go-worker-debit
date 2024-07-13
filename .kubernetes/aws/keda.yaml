@@ -1,7 +1,7 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: &component-name keda-scale-go-worker-debit
+  name: &component-name go-worker-debit-hpa
   namespace: test-a
   labels:
     app: *component-name
@@ -12,7 +12,7 @@ spec:
   cooldownPeriod:  60
   idleReplicaCount: 0 # Optional. Default: 0
   minReplicaCount: 0 # Optional. Default: 0
-  maxReplicaCount: 6 # Optional. Default: 6
+  maxReplicaCount: 2 # Optional. Default: 6
   triggers:
   - type: kafka
     metadata:

@@ -11,6 +11,8 @@ import(
 	"github.com/rs/zerolog/log"
 	"github.com/go-worker-debit/internal/erro"
 	"github.com/go-worker-debit/internal/lib"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 var childLogger = log.With().Str("adapter/restapi", "restapi").Logger()
@@ -58,7 +60,10 @@ func makeGet(ctx context.Context, url string, xApigwId string, data interface{})
 	span := lib.Span(ctx, url)	
     defer span.End()
 
-	client := &http.Client{Timeout: time.Second * 29}
+	client := &http.Client{
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+		Timeout: time.Second * 10,
+	}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -110,7 +115,10 @@ func makePost(ctx context.Context, url string, xApigwId string, data interface{}
 	span := lib.Span(ctx, url)	
     defer span.End()
 
-	client := &http.Client{Timeout: time.Second * 29}
+	client := &http.Client{
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+		Timeout: time.Second * 10,
+	}
 
 	payload := new(bytes.Buffer)
 	json.NewEncoder(payload).Encode(data)

@@ -116,8 +116,7 @@ func (c *ConsumerWorker) Consumer(ctx context.Context, wg *sync.WaitGroup, appSe
 					event := core.Event{}
 					json.Unmarshal(e.Value, &event)
 
-					tracer := tp.Tracer("go-worker-debit:" + event.EventData.Transfer.AccountIDTo + ":" + strconv.Itoa(event.EventData.Transfer.ID))
-					ctx, span := tracer.Start(ctx, "go-worker-debit")
+					ctx, span := tracer.Start(ctx, "go-worker-debit:" + event.EventData.Transfer.AccountIDTo + ":" + strconv.Itoa(event.EventData.Transfer.ID))
 					defer span.End()
 
 					err = c.workerService.DebitFundSchedule(ctx, *event.EventData.Transfer)

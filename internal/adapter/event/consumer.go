@@ -21,6 +21,7 @@ import (
 )
 
 var childLogger = log.With().Str("adpater", "kafka").Logger()
+var tracer 			trace.Tracer
 
 type ConsumerWorker struct{
 	configurations  *core.KafkaConfig

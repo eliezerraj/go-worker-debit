@@ -37,6 +37,7 @@ type InfoPod struct {
 type RestEndpoint struct {
 	ServiceUrlDomain 		string `json:"service_url_domain"`
 	XApigwId				string `json:"xApigwId"`
+	ServerHost			string `json:"server_host_localhost,omitempty"`
 }
 
 type KafkaConfig struct {

@@ -12,7 +12,7 @@ import(
 	"github.com/go-worker-debit/internal/adapter/event"
 	"github.com/go-worker-debit/internal/core"
 	"github.com/go-worker-debit/internal/service"
-	"github.com/go-worker-debit/internal/repository/postgre"
+	"github.com/go-worker-debit/internal/repository/pg"
 	"github.com/go-worker-debit/internal/adapter/restapi"
 )
 
@@ -48,10 +48,10 @@ func main()  {
 
 	// Open Database
 	count := 1
-	var databaseHelper	postgre.DatabaseHelper
+	var databasePG	pg.DatabasePG
 	var err error
 	for {
-		databaseHelper, err = postgre.NewDatabaseHelper(ctx, appServer.Database)
+		databasePG, err = pg.NewDatabasePGServer(ctx, appServer.Database)
 		if err != nil {
 			if count < 3 {
 				log.Error().Err(err).Msg("Erro open Database... trying again !!")
@@ -66,11 +66,11 @@ func main()  {
 		break
 	}
 
-	repoDB := postgre.NewWorkerRepository(databaseHelper)
-	restApiService	:= restapi.NewRestApiService()
+	repoDB := pg.NewWorkerRepository(databasePG)
+	restApiService	:= restapi.NewRestApiService(&appServer)
 
 	workerService := service.NewWorkerService(	&repoDB, 
-												appServer.RestEndpoint,
+												&appServer,
 												restApiService)
 
 	consumerWorker, err := event.NewConsumerWorker(ctx, 

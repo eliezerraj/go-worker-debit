@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"github.com/rs/zerolog/log"
-	"github.com/go-worker-debit/internal/repository/postgre"
+	"github.com/go-worker-debit/internal/repository/pg"
 	"github.com/go-worker-debit/internal/adapter/restapi"
 	"github.com/go-worker-debit/internal/core"
 	"github.com/go-worker-debit/internal/erro"
@@ -13,19 +13,19 @@ import (
 var childLogger = log.With().Str("service", "service").Logger()
 
 type WorkerService struct {
-	workerRepository 		*postgre.WorkerRepository
-	restEndpoint			*core.RestEndpoint
-	restApiService			*restapi.RestApiService
+	workerRepo		*pg.WorkerRepository
+	appServer		*core.WorkerAppServer
+	restApiService	*restapi.RestApiService
 }
 
-func NewWorkerService(	workerRepository *postgre.WorkerRepository,
-						restEndpoint		*core.RestEndpoint,
-						restApiService		*restapi.RestApiService) *WorkerService{
+func NewWorkerService(	workerRepo		*pg.WorkerRepository,
+						appServer		*core.WorkerAppServer,
+						restApiService	*restapi.RestApiService) *WorkerService{
 	childLogger.Debug().Msg("NewWorkerService")
 
 	return &WorkerService{
-		workerRepository:	workerRepository,
-		restEndpoint:		restEndpoint,
+		workerRepo:	workerRepo,
+		appServer:	appServer,
 		restApiService:		restApiService,
 	}
 }
@@ -36,17 +36,18 @@ func (s WorkerService) DebitFundSchedule(ctx context.Context, transfer core.Tran
 	
 	span := lib.Span(ctx, "service.DebitFundSchedule")
 
-	tx, err := s.workerRepository.StartTx(ctx)
+	tx, conn, err := s.workerRepo.StartTx(ctx)
 	if err != nil {
 		return err
 	}
-
+	
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			tx.Rollback(ctx)
 		} else {
-			tx.Commit()
+			tx.Commit(ctx)
 		}
+		s.workerRepo.ReleaseTx(conn)
 		span.End()
 	}()
 
@@ -58,11 +59,8 @@ func (s WorkerService) DebitFundSchedule(ctx context.Context, transfer core.Tran
 	debit.Type = transfer.Type
 	transfer.Status = "DEBIT_DONE"
 
-	urlDomain := s.restEndpoint.ServiceUrlDomain + "/add"
-	_, err = s.restApiService.PostData(ctx, 
-										urlDomain,
-										s.restEndpoint.XApigwId,
-										debit)
+	path := s.appServer.RestEndpoint.ServiceUrlDomain + "/add"
+	_, err = s.restApiService.CallRestApi(ctx,"POST",path, &s.appServer.RestEndpoint.XApigwId,debit)
 	if err != nil {
 		switch err{
 			case erro.ErrTransInvalid:
@@ -72,7 +70,7 @@ func (s WorkerService) DebitFundSchedule(ctx context.Context, transfer core.Tran
 			}
 	}
 
-	res_update, err := s.workerRepository.Update(ctx,tx ,transfer)
+	res_update, err := s.workerRepo.Update(ctx,tx ,transfer)
 	if err != nil {
 		return err
 	}

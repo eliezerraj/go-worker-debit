@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+
 	"github.com/rs/zerolog/log"
-	"github.com/go-worker-debit/internal/repository/pg"
+
+	"github.com/go-worker-debit/internal/repository/storage"
 	"github.com/go-worker-debit/internal/adapter/restapi"
 	"github.com/go-worker-debit/internal/core"
 	"github.com/go-worker-debit/internal/erro"
@@ -13,12 +15,12 @@ import (
 var childLogger = log.With().Str("service", "service").Logger()
 
 type WorkerService struct {
-	workerRepo		*pg.WorkerRepository
+	workerRepo		*storage.WorkerRepository
 	appServer		*core.WorkerAppServer
 	restApiService	*restapi.RestApiService
 }
 
-func NewWorkerService(	workerRepo		*pg.WorkerRepository,
+func NewWorkerService(	workerRepo		*storage.WorkerRepository,
 						appServer		*core.WorkerAppServer,
 						restApiService	*restapi.RestApiService) *WorkerService{
 	childLogger.Debug().Msg("NewWorkerService")
@@ -70,7 +72,7 @@ func (s WorkerService) DebitFundSchedule(ctx context.Context, transfer core.Tran
 			}
 	}
 
-	res_update, err := s.workerRepo.Update(ctx,tx ,transfer)
+	res_update, err := s.workerRepo.Update(ctx, tx, &transfer)
 	if err != nil {
 		return err
 	}

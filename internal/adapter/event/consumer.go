@@ -27,11 +27,9 @@ type ConsumerWorker struct{
 	configurations  *core.KafkaConfig
 	consumer        *kafka.Consumer
 	workerService	*service.WorkerService
-	tracer 			trace.Tracer
 }
 
-func NewConsumerWorker(	ctx context.Context, 
-						configurations *core.KafkaConfig,
+func NewConsumerWorker(	configurations *core.KafkaConfig,
 						workerService	*service.WorkerService ) (*ConsumerWorker, error) {
 	childLogger.Debug().Msg("NewConsumerWorker")
 
@@ -93,6 +91,7 @@ func (c *ConsumerWorker) Consumer(ctx context.Context, wg *sync.WaitGroup, appSe
 	}
 
 	run := true
+	event := core.Event{}
 	for run {
 		select {
 			case sig := <-sigchan:
@@ -119,7 +118,6 @@ func (c *ConsumerWorker) Consumer(ctx context.Context, wg *sync.WaitGroup, appSe
 					log.Print("Value : " ,string(e.Value))
 					log.Print("-----------------------------------")
 					
-					event := core.Event{}
 					json.Unmarshal(e.Value, &event)
 
 					ctx, span := tracer.Start(ctx, "go-worker-debit:" + event.EventData.Transfer.AccountIDTo + ":" + strconv.Itoa(event.EventData.Transfer.ID))

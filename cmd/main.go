@@ -74,8 +74,7 @@ func main()  {
 												&appServer,
 												restApiService)
 
-	consumerWorker, err := event.NewConsumerWorker(ctx, 
-													appServer.KafkaConfig, 
+	consumerWorker, err := event.NewConsumerWorker(	appServer.KafkaConfig, 
 													workerService)
 	if err != nil {
 		log.Error().Err(err).Msg("Erro na abertura do Kafka")

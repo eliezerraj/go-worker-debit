@@ -21,6 +21,8 @@ type WorkerAppServer struct {
 	RestEndpoint	*RestEndpoint	`json:"rest_endpoint"`
 	ConfigOTEL		*ConfigOTEL		`json:"otel_config"`
 	KafkaConfig		*KafkaConfig	`json:"kafka_config"`
+	AwsServiceConfig *AwsServiceConfig	`json:"aws_service_config"`
+	RestApiCallData *RestApiCallData `json:"rest_api_call_dsa_data"`
 }
 
 type InfoPod struct {
@@ -86,4 +88,49 @@ type ConfigOTEL struct {
 	ThreadsActiveUpperBound int64    `mapstructure:"RandomThreadsActiveUpperBound"`
 	CpuUsageUpperBound      int64    `mapstructure:"RandomCpuUsageUpperBound"`
 	SampleAppPorts          []string `mapstructure:"SampleAppPorts"`
+}
+
+type Transfer struct {
+	ID				int			`json:"id,omitempty"`
+	AccountIDFrom	string		`json:"account_id_from,omitempty"`
+	FkAccountIDFrom	int			`json:"fk_account_id_from,omitempty"`
+	TransferAt		time.Time 	`json:"transfer_at,omitempty"`
+	Type			string  	`json:"type_charge,omitempty"`
+	Status			string  	`json:"status,omitempty"`
+	Currency		string  	`json:"currency,omitempty"`
+	Amount			float64 	`json:"amount,omitempty"`
+	AccountIDTo		string		`json:"account_id_to,omitempty"`
+	FkAccountIDTo	int			`json:"fk_account_id_to,omitempty"`
+}
+
+type AccountStatement struct {
+	ID				int			`json:"id,omitempty"`
+	FkAccountID		int			`json:"fk_account_id,omitempty"`
+	AccountID		string		`json:"account_id,omitempty"`
+	Type			string  	`json:"type_charge,omitempty"`
+	ChargeAt		time.Time 	`json:"charged_at,omitempty"`
+	Currency		string  	`json:"currency,omitempty"`
+	Amount			float64 	`json:"amount,omitempty"`
+	TenantID		string  	`json:"tenant_id,omitempty"`
+}
+
+type AwsServiceConfig struct {
+	AwsRegion				string	`json:"aws_region"`
+	ServiceUrlJwtSA 		string	`json:"service_url_jwt_sa"`
+	SecretJwtSACredential 	string	`json:"secret_jwt_credential"`
+	UsernameJwtDA			string	`json:"username_jwt_sa"`
+	PasswordJwtDA			string	`json:"password_jwt_sa"`
+}
+
+type TokenSA struct {
+	Token string `json:"token,omitempty"`
+	Err   error
+}
+
+type RestApiCallData struct {
+	Url				string `json:"url"`
+	Method			string `json:"method"`
+	X_Api_Id		*string `json:"x-apigw-api-id"`
+	UsernameAuth	string `json:"user"`
+	PasswordAuth 	string `json:"password"`
 }

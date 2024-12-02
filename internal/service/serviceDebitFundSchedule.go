@@ -13,6 +13,7 @@ import (
 )
 
 var childLogger = log.With().Str("service", "service").Logger()
+var restApiCallData core.RestApiCallData
 
 type WorkerService struct {
 	workerRepo		*storage.WorkerRepository
@@ -61,8 +62,11 @@ func (s WorkerService) DebitFundSchedule(ctx context.Context, transfer core.Tran
 	debit.Type = transfer.Type
 	transfer.Status = "DEBIT_DONE"
 
-	path := s.appServer.RestEndpoint.ServiceUrlDomain + "/add"
-	_, err = s.restApiService.CallRestApi(ctx,"POST",path, &s.appServer.RestEndpoint.XApigwId,debit)
+	restApiCallData.Method = "POST"
+	restApiCallData.Url = s.appServer.RestEndpoint.ServiceUrlDomain + "/add/"
+	restApiCallData.X_Api_Id = &s.appServer.RestEndpoint.XApigwId
+
+	_, err = s.restApiService.CallApiRest(ctx, restApiCallData, debit)
 	if err != nil {
 		switch err{
 			case erro.ErrTransInvalid:

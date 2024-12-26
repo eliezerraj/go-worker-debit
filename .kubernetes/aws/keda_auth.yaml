@@ -13,3 +13,9 @@ spec:
   - parameter: password
     name: es-msk-go-worker-debit
     key: password
+  - parameter: sasl
+    name: es-msk-go-worker-credit
+    key: sasl
+  - parameter: tls
+    name: es-msk-go-worker-credit
+    key: tls

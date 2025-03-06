@@ -56,8 +56,8 @@ func GetKafkaEnv() (go_core_event.KafkaConfigurations, []string) {
 
 	list_topics := []string{}
 
-	if os.Getenv("TOPIC_CREDIT") !=  "" {
-		list_topics = append(list_topics, os.Getenv("TOPIC_CREDIT"))
+	if os.Getenv("TOPIC_DEBIT") !=  "" {
+		list_topics = append(list_topics, os.Getenv("TOPIC_DEBIT"))
 	}
 
 	return kafkaConfigurations, list_topics

@@ -1,6 +1,7 @@
 package service
 
 import(
+	"fmt"
 	"time"
 	"context"
 	"net/http"
@@ -32,12 +33,12 @@ func errorStatusCode(statusCode int) error{
 }
 
 func (s WorkerService) UpdateDebitMovimentTransfer(ctx context.Context, transfer *model.Transfer) (*model.Transfer, error){
-	childLogger.Debug().Msg("UpdateDebitMovimentTransfer")
-	childLogger.Debug().Interface("transfer: ",transfer).Msg("")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("UpdateDebitMovimentTransfer")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("transfer: ",transfer).Msg("")
 
 	//Trace
 	span := tracerProvider.Span(ctx, "service.UpdateDebitMovimentTransfer")
-	defer span.End()
+	trace_id := fmt.Sprintf("%v",ctx.Value("trace-request-id"))
 
 	// Get the database connection
 	tx, conn, err := s.workerRepository.DatabasePGServer.StartTx(ctx)
@@ -73,7 +74,8 @@ func (s WorkerService) UpdateDebitMovimentTransfer(ctx context.Context, transfer
 														s.apiService[0].Url + "/" + transfer.AccountFrom.AccountID,
 														s.apiService[0].Method,
 														&s.apiService[0].Header_x_apigw_api_id,
-														nil, 
+														nil,
+														&trace_id,
 														nil)
 	if err != nil {
 		return nil, errorStatusCode(statusCode)
@@ -92,7 +94,8 @@ func (s WorkerService) UpdateDebitMovimentTransfer(ctx context.Context, transfer
 											s.apiService[1].Url,
 											s.apiService[1].Method,
 											&s.apiService[1].Header_x_apigw_api_id,
-											nil, 
+											nil,
+											&trace_id,
 											transfer.AccountFrom)
 	if err != nil {
 		return nil, errorStatusCode(statusCode)

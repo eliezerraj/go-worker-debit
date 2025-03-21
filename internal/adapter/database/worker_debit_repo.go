@@ -21,7 +21,7 @@ type WorkerRepository struct {
 }
 
 func NewWorkerRepository(databasePGServer *go_core_pg.DatabasePGServer) *WorkerRepository{
-	childLogger.Debug().Msg("NewWorkerRepository")
+	childLogger.Info().Msg("NewWorkerRepository")
 
 	return &WorkerRepository{
 		DatabasePGServer: databasePGServer,
@@ -29,7 +29,7 @@ func NewWorkerRepository(databasePGServer *go_core_pg.DatabasePGServer) *WorkerR
 }
 
 func (w WorkerRepository) GetTransactionUUID(ctx context.Context) (*string, error){
-	childLogger.Debug().Msg("GetTransactionUUID")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("GetTransactionUUID")
 	
 	// Trace
 	span := tracerProvider.Span(ctx, "database.GetTransactionUUID")
@@ -65,7 +65,7 @@ func (w WorkerRepository) GetTransactionUUID(ctx context.Context) (*string, erro
 }
 
 func (w WorkerRepository) UpdateDebitMovimentTransfer(ctx context.Context, tx pgx.Tx, transfer *model.Transfer) (int64, error){
-	childLogger.Debug().Msg("UpdateDebitMovimentTransfer")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("UpdateDebitMovimentTransfer")
 
 	// trace
 	span := tracerProvider.Span(ctx, "database.UpdateDebitMovimentTransfer")
@@ -82,7 +82,7 @@ func (w WorkerRepository) UpdateDebitMovimentTransfer(ctx context.Context, tx pg
 		return 0, errors.New(err.Error())
 	}
 
-	childLogger.Debug().Interface("rowsAffected : ", row.RowsAffected()).Msg("")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("rowsAffected : ", row.RowsAffected()).Msg("")
 
 	return int64(row.RowsAffected()) , nil
 }

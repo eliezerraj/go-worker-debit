@@ -20,7 +20,7 @@ type WorkerEvent struct {
 }
 
 func NewWorkerEvent(ctx context.Context, topics []string, kafkaConfigurations *go_core_event.KafkaConfigurations) (*WorkerEvent, error) {
-	childLogger.Debug().Msg("NewWorkerEvent")
+	childLogger.Info().Msg("NewWorkerEvent")
 
 	//trace
 	span := tracerProvider.Span(ctx, "adapter.event.NewWorkerEvent")

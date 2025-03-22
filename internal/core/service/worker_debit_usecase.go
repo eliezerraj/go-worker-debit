@@ -33,8 +33,7 @@ func errorStatusCode(statusCode int) error{
 }
 
 func (s WorkerService) UpdateDebitMovimentTransfer(ctx context.Context, transfer *model.Transfer) (*model.Transfer, error){
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("UpdateDebitMovimentTransfer")
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("transfer: ",transfer).Msg("")
+	childLogger.Info().Str("func","UpdateDebitMovimentTransfer").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("transfer", transfer).Send()
 
 	//Trace
 	span := tracerProvider.Span(ctx, "service.UpdateDebitMovimentTransfer")

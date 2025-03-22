@@ -13,15 +13,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var childLogger = log.With().Str("component","go-worker-debit").Str("package","internal.adapter.database").Logger()
+
 var tracerProvider go_core_observ.TracerProvider
-var childLogger = log.With().Str("adapter", "database").Logger()
 
 type WorkerRepository struct {
 	DatabasePGServer *go_core_pg.DatabasePGServer
 }
 
 func NewWorkerRepository(databasePGServer *go_core_pg.DatabasePGServer) *WorkerRepository{
-	childLogger.Info().Msg("NewWorkerRepository")
+	childLogger.Info().Str("func","NewWorkerRepository").Send()
 
 	return &WorkerRepository{
 		DatabasePGServer: databasePGServer,
@@ -29,7 +30,7 @@ func NewWorkerRepository(databasePGServer *go_core_pg.DatabasePGServer) *WorkerR
 }
 
 func (w WorkerRepository) GetTransactionUUID(ctx context.Context) (*string, error){
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("GetTransactionUUID")
+	childLogger.Info().Str("func","GetTransactionUUID").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Send()
 	
 	// Trace
 	span := tracerProvider.Span(ctx, "database.GetTransactionUUID")
@@ -65,7 +66,7 @@ func (w WorkerRepository) GetTransactionUUID(ctx context.Context) (*string, erro
 }
 
 func (w WorkerRepository) UpdateDebitMovimentTransfer(ctx context.Context, tx pgx.Tx, transfer *model.Transfer) (int64, error){
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("UpdateDebitMovimentTransfer")
+	childLogger.Info().Str("func","GetTransactionUUID").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Send()
 
 	// trace
 	span := tracerProvider.Span(ctx, "database.UpdateDebitMovimentTransfer")
@@ -82,7 +83,7 @@ func (w WorkerRepository) UpdateDebitMovimentTransfer(ctx context.Context, tx pg
 		return 0, errors.New(err.Error())
 	}
 
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("rowsAffected : ", row.RowsAffected()).Msg("")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("rowsAffected : ", row.RowsAffected()).Send()
 
 	return int64(row.RowsAffected()) , nil
 }

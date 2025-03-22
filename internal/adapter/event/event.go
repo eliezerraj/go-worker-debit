@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var childLogger = log.With().Str("adapter", "event").Logger()
+var childLogger = log.With().Str("component","go-worker-debit").Str("package","internal.adapter.event").Logger()
 
 var tracerProvider go_core_observ.TracerProvider
 var consumerWorker go_core_event.ConsumerWorker
@@ -20,7 +20,7 @@ type WorkerEvent struct {
 }
 
 func NewWorkerEvent(ctx context.Context, topics []string, kafkaConfigurations *go_core_event.KafkaConfigurations) (*WorkerEvent, error) {
-	childLogger.Info().Msg("NewWorkerEvent")
+	childLogger.Info().Str("func","NewWorkerEvent").Send()
 
 	//trace
 	span := tracerProvider.Span(ctx, "adapter.event.NewWorkerEvent")

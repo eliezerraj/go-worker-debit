@@ -20,7 +20,7 @@ import (
 	go_core_event "github.com/eliezerraj/go-core/event/kafka" 
 )
 
-var childLogger = log.With().Str("infra", "server").Logger()
+var childLogger = log.With().Str("component","go-worker-debit").Str("package","internal.infra.server").Logger()
 
 var tracerProvider go_core_observ.TracerProvider
 var consumerWorker go_core_event.ConsumerWorker
@@ -34,7 +34,7 @@ type ServerWorker struct {
 
 // Set a trace-i inside the context
 func setContextTraceId(ctx context.Context, trace_id string) context.Context {
-	childLogger.Info().Interface("trace_id", trace_id).Msg("setContextTraceId")
+	childLogger.Info().Str("func","setContextTraceId").Interface("trace_id", trace_id).Send()
 
 	var traceUUID string
 
@@ -49,7 +49,7 @@ func setContextTraceId(ctx context.Context, trace_id string) context.Context {
 
 // About create a worker event
 func NewServerWorker(workerService *service.WorkerService, workerEvent *event.WorkerEvent ) *ServerWorker {
-	childLogger.Info().Msg("NewWorkerEvent")
+	childLogger.Info().Str("func","NewServerWorker").Send()
 
 	return &ServerWorker{
 		workerService: workerService,
@@ -59,11 +59,9 @@ func NewServerWorker(workerService *service.WorkerService, workerEvent *event.Wo
 
 // About consume event kafka
 func (s *ServerWorker) Consumer(ctx context.Context, appServer *model.AppServer ,wg *sync.WaitGroup ) {
-	childLogger.Info().Msg("Consumer")
+	childLogger.Info().Str("func","Consumer").Send()
 
 	// otel
-	childLogger.Info().Str("OTEL_EXPORTER_OTLP_ENDPOINT :", appServer.ConfigOTEL.OtelExportEndpoint).Msg("")
-
 	infoTrace.PodName = appServer.InfoPod.PodName
 	infoTrace.PodVersion = appServer.InfoPod.ApiVersion
 	infoTrace.ServiceType = "k8-workload"
@@ -81,7 +79,7 @@ func (s *ServerWorker) Consumer(ctx context.Context, appServer *model.AppServer 
 	defer func() { 
 		err := tp.Shutdown(ctx)
 		if err != nil{
-			childLogger.Error().Err(err).Msg("error closing OTEL tracer !!!")
+			childLogger.Info().Err(err).Send()
 		}
 		childLogger.Info().Msg("closing consumer waiting please !!!")
 		defer wg.Done()
@@ -92,9 +90,9 @@ func (s *ServerWorker) Consumer(ctx context.Context, appServer *model.AppServer 
 	go s.workerEvent.WorkerKafka.Consumer(s.workerEvent.Topics, messages)
 
 	for msg := range messages {
-		childLogger.Info().Msg("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+		childLogger.Info().Msg("=============== MSG FROM KAFKA ==================")
 		childLogger.Info().Interface("msg: ",msg).Msg("")
-		childLogger.Info().Msg("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+		childLogger.Info().Msg("=============== MSG FROM KAFKA ==================")
 		
 		// Marshall payload	
 		var transfer model.Transfer

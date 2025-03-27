@@ -45,7 +45,7 @@ func init(){
 }
 
 func main (){
-	childLogger.Info().Str("func","main").Interface("appServer :",appServer).Send()
+	childLogger.Info().Str("func","main").Interface("appServer",appServer).Send()
 
 	ctx := context.Background()
 

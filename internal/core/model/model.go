@@ -51,7 +51,7 @@ type AccountStatement struct {
 	FkAccountID		int			`json:"fk_account_id,omitempty"`
 	AccountID		string		`json:"account_id,omitempty"`
 	Type			string  	`json:"type_charge,omitempty"`
-	ChargeAt		time.Time 	`json:"charged_at,omitempty"`
+	ChargedAt		time.Time 	`json:"charged_at,omitempty"`
 	Currency		string  	`json:"currency,omitempty"`
 	Amount			float64 	`json:"amount,omitempty"`
 	TenantID		string  	`json:"tenant_id,omitempty"`
